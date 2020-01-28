@@ -42,7 +42,7 @@ fi
 export OPTLEVEL=3
 export BUILDDIR="${BASEDIR}build/"
 export Z3_ROOT="${BUILDDIR}z3/"
-export EMSDK_ROOT="${BUILDDIR}emsdk-portable/"
+export EMSDK_ROOT="${BUILDDIR}emsdk/"
 export EMSCRIPTEN_TEMPDIR="/tmp/emscripten/"
 
 function say() {
@@ -85,9 +85,24 @@ say '*******************'
 rm -rf "$BUILDDIR"
 mkdir "$BUILDDIR"
 
-say '* wget emscripten'; {
-    wget --quiet -O /tmp/emsdk-portable.tar.gz https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-portable.tar.gz
-    tar -xf /tmp/emsdk-portable.tar.gz -C "$BUILDDIR"
+say '* git emscripten'; {
+    # Get the emsdk repo
+    git clone https://github.com/emscripten-core/emsdk.git emsdk
+
+    # Enter that directory
+    cd emsdk
+
+    # Fetch the latest version of the emsdk (not needed the first time you clone)
+    git pull
+
+    # Download and install the latest SDK tools.
+    ./emsdk install latest
+
+    # Make the "latest" SDK "active" for the current user. (writes ~/.emscripten file)
+    ./emsdk activate latest
+
+    # Activate PATH and other environment variables in the current terminal
+    source ./emsdk_env.sh
 }
 
 say '* git clone z3'; {
